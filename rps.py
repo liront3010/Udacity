@@ -19,16 +19,20 @@ def beats(one, two):
 
 
 class Player:
+    def __init__(self):
+        self.my_move = random.choice(moves)
+        self.their_move = random.choice(moves)
+
     def move(self):
-        return 'rock'
+        return self.my_move
 
     def learn(self, my_move, their_move):
         pass
 
 
 class RandomPlayer(Player):
-    def move(self):
-        return random.choice(moves)
+    def learn(self, my_move, their_move):
+        self.my_move = random.choice(moves)
 
 
 class HumanPlayer(Player):
@@ -38,32 +42,21 @@ class HumanPlayer(Player):
             choice = choice.lower()
             if choice in moves:
                 return choice
+            print('Invalid move! Try Again.')
 
 
 class ReflectPlayer(Player):
-    def __init__(self):
-        self.next_move = random.choice(moves)
-
-    def move(self):
-        return self.next_move
-
     def learn(self, my_move, their_move):
-        self.next_move = their_move
+        self.their_move = their_move
 
 
 class CyclePlayer(Player):
-    def __init__(self):
-        first_move = random.choice(moves)
-        self.next_move_index = moves.index(first_move)
-
-    def move(self):
-        return moves[self.next_move_index]
-
     def learn(self, my_move, their_move):
-        if self.next_move_index + 1 >= len(moves):
-            self.next_move_index = 0
+        move_index = moves.index(self.my_move)
+        if move_index + 1 >= len(moves):
+            self.my_move = moves[0]
         else:
-            self.next_move_index += 1
+            self.my_move = moves[move_index + 1]
 
 
 class Game:
@@ -95,7 +88,7 @@ class Game:
             self.round += 1
             print(f"""\n=== Round: {self.round} ===""")
             self.play_round()
-            print(f"""Score: Player One {self.p1_score} \
+            print(f"""Score -  Player One: {self.p1_score} \
 Player Two: { self.p2_score}""")
             if self.p1_score == 3:
                 print("\n** PLAYER ONE WINS THE GAME! **")
@@ -103,9 +96,18 @@ Player Two: { self.p2_score}""")
             elif self.p2_score == 3:
                 print("\n** PLAYER TWO WINS THE GAME! **")
                 break
+        print(f"""Final score - Player One: {self.p1_score} \
+Player Two: { self.p2_score}""")
         print("Game over!")
 
 
 if __name__ == '__main__':
-    game = Game(HumanPlayer(), CyclePlayer())
+    players = [
+        RandomPlayer(),
+        ReflectPlayer(),
+        CyclePlayer()
+    ]
+    p1 = HumanPlayer()
+    p2 = random.choice(players)
+    game = Game(p1, p2)
     game.play_game()
